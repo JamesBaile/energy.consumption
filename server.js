@@ -6,7 +6,7 @@ var bodyParser = require('body-parser')
 var EnergyConsumption = require('./models/energy-consumption');
 
 // Use environment defined port or 3000
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 3010;
 var mongoConnection = process.env.MONGO || 'mongodb://mongo:27017/energy-usage';
 
 console.log(mongoConnection);
@@ -47,27 +47,30 @@ createRoute.post(function(req, res) {
   data.electricityUsage = req.body.electricityUsage;
 
   data.save(function(err) {
-    if (err)
+    if (err) {
       res.send(err);
-
-    res.json({ message: 'Energy consumption saved', data: energyUsage });
+      return;
+    };
+    res.json({ message: 'Energy consumption saved', data: data });
   });
 });
 // Create a new route with the /beers/:beer_id prefix
 var route = router.route('/consumption/:customerId');
 
 route.get(function(req, res) {
-  var criteria = {customerId, req.params.customerId};
-  EnergyUsage.findOne(criteria, function(err, data) {
-    if (err)
+  var criteria = {customerId: req.params.customerId};
+  EnergyConsumption.findOne(criteria, function(err, data) {
+    if (err) {
       res.send(err);
+      return;
+    };
 
     res.json(data);
   });
 });
 
 route.put(function(req, res) {
-  var criteria = {customerId, req.params.customerId};
+  var criteria = {customerId: req.params.customerId};
   EnergyConsumption.findOne(criteria, function(err, data) {
     if (err)
       res.send(err);
@@ -90,8 +93,8 @@ route.put(function(req, res) {
 // Create endpoint /api/beers/:beer_id for DELETE
 route.delete(function(req, res) {
   // Use the Beer model to find a specific beer and remove it
-  var criteria = {customerId, req.params.customerId};
-  EnergyConsumption.deleteOne(criteria, function(err) {
+  var criteria = {customerId: req.params.customerId};
+  EnergyConsumption.find(criteria).remove(function(err) {
     if (err)
       res.send(err);
 
